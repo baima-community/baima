@@ -1,0 +1,885 @@
+swagger: "2.0"
+info:
+  description: "The Baima Community System serves as a forum for users to engage in discussions and share content. Additionally, it includes a member points management system to incentivize user participation."
+  version: "0.0.1"
+  title: "Baima"
+  contact:
+    email: "zhegao@yahoo.com"
+  license:
+    name: "GPLv3"
+    url: "https://www.gnu.org/licenses/gpl-3.0.en.html"
+
+host: "api.baima.co"
+basePath: "/v1"
+schemes:
+- "http"
+- "https"
+produces:
+  - "application/json"
+  - "text/plain"
+consumes:
+  - "application/json"
+  - "text/plain"
+
+paths:
+  /user/login:
+    post:
+      tags:
+        - "user"
+      operationId: "login"
+      parameters:
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+              $ref: "#/definitions/User"
+      responses:
+        200:
+          description: "Login successfully"
+          schema:
+            type: "object"
+            properties:
+              token:
+                type: "string"
+        401:
+          description: "Invalid Username or Password"
+          schema:
+            $ref: "#/definitions/APIResponse"
+        404:
+          description: "User Not Found"
+          schema:
+            $ref: "#/definitions/APIResponse"
+        500:
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+  /user/logout:
+    post:
+      operationId: "logout"
+      responses:
+        200:
+          description: "Logout Successfully"
+        500:
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+  /user/signup:
+    post:
+      operationId: "signup"
+      parameters:
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/User"
+      responses:
+        200:
+          description: "User created"
+          schema:
+            $ref: "#/definitions/APIResponse"
+        500:
+          description: "Internal Server Error"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+  /user/check_username:
+    get:
+      summary: "Check if the username is available"
+      operationId: "checkUsername"
+      parameters:
+        - name: "username"
+          in: "query"
+          required: true
+          type: string
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: object
+            properties:
+              available:
+                type: "boolean"
+                description: "Whether the username is available"
+
+  /user/{username}/reset_password:
+    post:
+      tags:
+        - "user"
+      operationId: "resetPassword"
+      parameters:
+        - name: "username"
+          in: "path"
+          required: true
+          type: "string"
+        - in: "body"
+          name: "body"
+          required: true
+          schema:
+            type: object
+            properties:
+              password:
+                type: "string"
+      responses:
+        200:
+          description: "Password Updated"
+          schema:
+            $ref: "#/definitions/APIResponse"
+        400:
+          description: "Bad Request"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+  /user/{username}/groups:
+    get:
+      tags:
+        - "user"
+      operationId: "getUserGroups"
+      parameters:
+      - name: "username"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Group"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+  /user/{username}/profile:
+    get:
+      tags:
+      - "user"
+      operationId: "getUser"
+      parameters:
+      - name: "username"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/User"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+    put:
+      tags:
+      - "user"
+      operationId: "updateUser"
+      parameters:
+      - name: "username"
+        in: "path"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/User"
+      responses:
+        200:
+          description: "User updated"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+    delete:
+      tags:
+      - "user"
+      summary: "Delete user"
+      operationId: "deleteUser"
+      parameters:
+      - name: "username"
+        in: "path"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "User deleted"
+        404:
+          description: "User not found"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+  /notifications:
+    get:
+      tags:
+      - "notifications"
+      operationId: "getNotifications"
+      parameters:
+      - name: "username"
+        in: "query"
+        required: true
+        type: "string"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/Notification"
+    post:
+      tags:
+        - "notifications"
+      operationId: "sendNotifications"
+      parameters:
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/Notification"
+        - name: "users"
+          in: "body"
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              format: "uuid"
+      responses:
+        200:
+          description: "Notified successfully"
+
+
+
+  /user/overview:
+    get:
+      tags:
+      - "user"
+      operationId: "listUsers"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
+
+  /group/overview:
+    get:
+      tags:
+      - "group"
+      operationId: "listGroups"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Group"
+
+  /group:
+    post:
+      tags:
+        - "group"
+      operationId: "createGroup"
+      parameters:
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/Group"
+      responses:
+        200:
+          description: "Group created"
+
+  /group/{id}:
+    get:
+      tags:
+        - "group"
+      operationId: "getGroup"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Group"
+
+    put:
+      tags:
+        - "group"
+      operationId: "updateGroup"
+      parameters:
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/Group"
+      responses:
+        200:
+          description: "Group updated"
+
+  /category/overview:
+    get:
+      tags:
+      - "category"
+      operationId: "listCategory"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/Category"
+
+  /category:
+    post:
+      tags:
+      - "category"
+      operationId: "createCategory"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/Category"
+      responses:
+        200:
+          description: "Category created"
+
+  /category/{id}:
+    get:
+      tags:
+      - "category"
+      summary: "Get category by ID"
+      operationId: "getCategoryById"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "Category ID"
+        required: true
+        type: "string"
+        format: "uuid"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Category"
+        404:
+          description: "Cetegory not found"
+          schema:
+            $ref: "#/definitions/APIResponse"
+
+    put:
+      tags:
+      - "category"
+      summary: "Updated category"
+      operationId: "updateCategory"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+        format: "uuid"
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/Category"
+      responses:
+        200:
+          description: "Category updated"
+
+    delete:
+      tags:
+      - "category"
+      summary: "Delete category"
+      operationId: "deleteCategory"
+      parameters:
+      - name: "id"
+        in: "path"
+        description: "The category that needs to be deleted"
+        required: true
+        type: "string"
+      responses:
+        204:
+          description: "Category deleted"
+
+  /topic:
+    post:
+      tags:
+      - "topic"
+      summary: "Create topic"
+      operationId: "createTopic"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "Created topic object"
+        required: true
+        schema:
+          $ref: "#/definitions/Topic"
+      responses:
+        "200":
+          description: "Topic create"
+        "500":
+          description: "Internal server error"
+
+  /topic/{id}:
+    get:
+      tags:
+      - "topic"
+      summary: "Get topic"
+      operationId: "getTopicByID"
+      parameters:
+      - name: "id"
+        in: "path"
+        required: true
+        type: "string"
+        format: uuid
+      responses:
+        "200":
+          description: "OK"
+          schema:
+            $ref: "#/definitions/Topic"
+        "404":
+          description: "Topic not found"
+
+    put:
+      tags:
+      - "topic"
+      summary: "Updated topic"
+      operationId: "updateTopic"
+      parameters:
+      - name: "topic"
+        in: "path"
+        description: "Topic that need to be updated"
+        required: true
+        type: "string"
+      - in: "body"
+        name: "body"
+        description: "Updated topic object"
+        required: true
+        schema:
+          $ref: "#/definitions/Topic"
+      responses:
+        "200":
+          description: "Topic updated"
+        "400":
+          description: "Invalid user supplied"
+        "404":
+          description: "User not found"
+
+    delete:
+      tags:
+      - "topic"
+      summary: "Delete topic"
+      operationId: "deleteTopic"
+      parameters:
+      - name: "topic"
+        in: "path"
+        description: "The topic that needs to be deleted"
+        required: true
+        type: "string"
+      responses:
+        "204":
+          description: "Topic deleted"
+        "404":
+          description: "Topic not found"
+        "500":
+          description: "Internal server error"
+
+  /points/grant:
+    post:
+      tags:
+      - "points"
+      summary: "Grant user points from pool"
+      operationId: "grantPoints"
+      parameters:
+      - in: "body"
+        name: "body"
+        required: true
+        schema:
+          $ref: "#/definitions/Points"
+      responses:
+        200:
+          description: "Points granted successfully"
+
+  /points/overview:
+    get:
+      summary: Get points history
+      parameters:
+        - name: username
+          in: query
+          description: ID of the user for whom the points history is requested
+          required: true
+          type: string
+      responses:
+        200:
+          description: OK
+          schema:
+            type: object
+            properties:
+              overview:
+                type: array
+                items:
+                  $ref: '#/definitions/Points'
+
+  /points/transfer:
+    post:
+      tags:
+        - points
+      summary: Transfer points from current user to another user
+      operationId: "transferPoints"
+      parameters:
+      - in: "body"
+        name: "body"
+        schema:
+          $ref: '#/definitions/Points'
+      responses:
+        200:
+          description: Points transferred successfully
+        500:
+          description: Internal server error
+
+  /warehouse/points:
+    get:
+      tags:
+        - points
+      summary: "Get points details of warehouse"
+      operationId: "getWarehousePoints"
+      responses:
+        200:
+          description: OK
+          schema:
+            type: array
+            items:
+              $ref: "#/definitions/WarehousePoints"
+
+    post:
+      tags:
+        - points
+      summary: Create a warehouse points record
+      operationId: "createWarehousePoints"
+      parameters:
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            $ref: "#/definitions/WarehousePoints"
+      responses:
+        200:
+          description: "Warehouse Points Created"
+
+
+definitions:
+  APIResponse:
+    type: "object"
+    properties:
+      code:
+        type: "integer"
+      message:
+        type: "string"
+
+  Group:
+    type: object
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      name:
+        type: "string"
+        enum: ["root", "stem", "leaf", "flower", "pond", "seed"]
+        example: "flower"
+      display_name:
+        type: "string"
+        example: "白玛花花"
+      users:
+        type: array
+        items:
+          type: "string"
+          format: "uuid"
+
+  Category:
+    type: "object"
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      title:
+        type: "string"
+      icon:
+        type: "string"
+        format: "byte"
+      description:
+        type: "string"
+      created:
+        type: "string"
+        format: "date-time"
+      can_edit:
+        type: "boolean"
+      topic_overview:
+        type: array
+        items:
+          $ref: "#/definitions/TopicOverview"
+
+  TopicOverview:
+    type: "array"
+    items:
+      type: "object"
+      required:
+        - topic_id
+        - category_id
+        - title
+        - abstract
+        - replies
+        - last_updated
+      properties:
+        topic_id:
+          type: "string"
+          format: "uuid"
+        title:
+          type: "string"
+        abstract:
+          type: "string"
+        replies:
+          type: "integer"
+        last_updated:
+          type: "string"
+          format: "date-time"
+        category_id:
+          type: "string"
+          format: "uuid"
+
+  Topic:
+    type: "object"
+    required:
+      - id
+      - title
+      - body
+      - user_id
+      - username
+      - category_id
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      category_id:
+        type: "string"
+        format: "uuid"
+      title:
+        type: "string"
+      body:
+        type: "string"
+      tags:
+        type: "array"
+        items:
+          type: string
+      user_id:
+        type: "string"
+        format: "uuid"
+      username:
+        type: "string"
+      created:
+        type: "string"
+        format: "date-time"
+      updated:
+        type: "string"
+        format: "date-time"
+      views:
+        type: "integer"
+        format: "int64"
+      likes:
+        type: "integer"
+        format: "int64"
+      rewards:
+        type: array
+        items:
+          $ref: "#/definitions/Reward"
+      replies:
+        type: "array"
+        items:
+          type: "object"
+          properties:
+            schema:
+              $ref: "#/definitions/Reply"
+
+  Reply:
+    type: "object"
+    required:
+      - id
+      - topic_id
+      - user_id
+      - body
+      - created
+      - likes
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      topic_id:
+        type: "string"
+        format: "uuid"
+      user_id:
+        type: "string"
+      body:
+        type: "string"
+      likes:
+        type: "integer"
+      created:
+        type: "string"
+        format: "date-time"
+
+  User:
+    type: "object"
+    required:
+      - id
+      - username
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      name:
+        type: "string"
+        example: "Zhe Gao"
+      username:
+        type: "string"
+        example: "zhegao"
+      password:
+        type: "string"
+        format: "password"
+      role:
+        type: "string"
+        enum: ["superadmin", "admin", "user"]
+      avatar:
+        type: "string"
+        format: "uri"
+      points:
+        type: "number"
+        format: "double"
+      status:
+        type: "string"
+        enum: ["pending", "enabled", "disabled"]
+      created:
+        type: "string"
+        format: "date-time"
+      rewards_overview:
+        type: array
+        properties:
+          schema:
+            $ref: "#/definitions/Reward"
+      rewards:
+        type: "number"
+        format: "double"
+
+  Reward:
+    type: object
+    required:
+      - created
+      - points
+      - note
+      - source
+      - from_user_id
+      - to_user_id
+    properties:
+      from_user_id:
+        type: "string"
+        format: "uuid"
+        description: ID of the user who change the points
+      to_user_id:
+        type: "string"
+        format: "uuid"
+      points:
+        type: integer
+        format: int64
+        description: Number of points changed
+      note:
+        type: string
+        description: Note explaining the reason for the points change
+      source:
+        type: "string"
+        format: "uri"
+        description: "The source page for getting the rewards"
+      created:
+        type: string
+        format: date-time
+        description: Date of the points change
+
+
+  WarehousePoints:
+    type: object
+    required:
+      - id
+      - user_id
+      - points
+      - created
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      user_id:
+        type: "string"
+        format: "uuid"
+      points:
+        type: "number"
+        format: "double"
+      created:
+        type: "string"
+        format: "date-time"
+      note:
+        type: "string"
+
+  Points:
+    type: "object"
+    required:
+      - from_user_id
+      - to_user_id
+      - action
+      - created
+      - points
+    properties:
+      from_user_id:
+        type: "string"
+        format: "uuid"
+      to_user_id:
+        type: "string"
+        format: "uuid"
+      action:
+        type: string
+        enum: ["transfer", "grant", "reward"]
+      created:
+        type: "string"
+        format: "date-time"
+        description: "Date of the points change"
+      points:
+        type: "number"
+        format: "double"
+        description: "Number of points changed"
+      note:
+        type: "string"
+        description: "Note explaining the reason for the points change"
+
+  Notification:
+    type: object
+    required:
+      - id
+      - title
+      - body
+      - created
+      - is_read
+    properties:
+      id:
+        type: "string"
+        format: "uuid"
+      title:
+        type: "string"
+      body:
+        type: "string"
+      created:
+        type: "string"
+        format: "date-time"
+      is_read:
+        type: boolean
+      uri:
+        type: "string"
+        format: "uri"
