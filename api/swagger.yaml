@@ -190,6 +190,8 @@ paths:
       responses:
         200:
           description: "User updated"
+          schema:
+            $ref: "#/definitions/APIResponse"
         404:
           description: "User not found"
           schema:
@@ -208,10 +210,25 @@ paths:
       responses:
         204:
           description: "User deleted"
+          schema:
+            $ref: "#/definitions/APIResponse"
         404:
           description: "User not found"
           schema:
             $ref: "#/definitions/APIResponse"
+
+  /user/overview:
+    get:
+      tags:
+      - "user"
+      operationId: "listUsers"
+      responses:
+        200:
+          description: "OK"
+          schema:
+            type: "array"
+            items:
+              $ref: "#/definitions/User"
 
   /notifications:
     get:
@@ -230,6 +247,8 @@ paths:
             type: array
             items:
               $ref: "#/definitions/Notification"
+
+  /notifications/send:
     post:
       tags:
         - "notifications"
@@ -240,32 +259,44 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/Notification"
-        - name: "users"
-          in: "body"
-          required: true
-          schema:
-            type: array
-            items:
-              type: string
-              format: "uuid"
       responses:
         200:
           description: "Notified successfully"
+          schema:
+            $ref: "#/definitions/APIResponse"
 
-
-
-  /user/overview:
-    get:
+  /notifications/{id}/status:
+    put:
       tags:
-      - "user"
-      operationId: "listUsers"
+        - "notifications"
+      operationId: "updateNotificationStatus"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+          format: "uuid"
+        - name: "body"
+          in: "body"
+          required: true
+          schema:
+            type: object
+            properties:
+              id:
+                type: string
+                format: uuid
+                description: Notification ID
+              user_id:
+                type: string
+                format: uuid
+              status:
+                type: string
+                enum: ["unread", "read"]
       responses:
         200:
-          description: "OK"
+          description: Notification Status Updated
           schema:
-            type: "array"
-            items:
-              $ref: "#/definitions/User"
+            $ref: "#/definitions/APIResponse"
 
   /group/overview:
     get:
@@ -299,7 +330,13 @@ paths:
     get:
       tags:
         - "group"
-      operationId: "getGroup"
+      operationId: "getGroupByID"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+          format: "uuid"
       responses:
         200:
           description: "OK"
@@ -309,8 +346,13 @@ paths:
     put:
       tags:
         - "group"
-      operationId: "updateGroup"
+      operationId: "updateGroupByID"
       parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+          format: "uuid"
         - name: "body"
           in: "body"
           required: true
@@ -319,6 +361,20 @@ paths:
       responses:
         200:
           description: "Group updated"
+
+    delete:
+      tags:
+        - "group"
+      operationId: "deleteGroupByID"
+      parameters:
+        - name: "id"
+          in: "path"
+          required: true
+          type: "string"
+          format: "uuid"
+      responses:
+        204:
+          description: "Group deleted"
 
   /category/overview:
     get:
@@ -353,7 +409,7 @@ paths:
       tags:
       - "category"
       summary: "Get category by ID"
-      operationId: "getCategoryById"
+      operationId: "getCategoryByID"
       parameters:
       - name: "id"
         in: "path"
@@ -402,6 +458,7 @@ paths:
         description: "The category that needs to be deleted"
         required: true
         type: "string"
+        format: "uuid"
       responses:
         204:
           description: "Category deleted"
@@ -432,7 +489,7 @@ paths:
       summary: "Get topic"
       operationId: "getTopicByID"
       parameters:
-      - name: "id"
+      - name: id
         in: "path"
         required: true
         type: "string"
@@ -451,7 +508,7 @@ paths:
       summary: "Updated topic"
       operationId: "updateTopic"
       parameters:
-      - name: "topic"
+      - name: "id"
         in: "path"
         description: "Topic that need to be updated"
         required: true
@@ -476,7 +533,7 @@ paths:
       summary: "Delete topic"
       operationId: "deleteTopic"
       parameters:
-      - name: "topic"
+      - name: "id"
         in: "path"
         description: "The topic that needs to be deleted"
         required: true
@@ -765,8 +822,7 @@ definitions:
         format: "date-time"
       rewards_overview:
         type: array
-        properties:
-          schema:
+        items:
             $ref: "#/definitions/Reward"
       rewards:
         type: "number"
@@ -867,6 +923,7 @@ definitions:
       - body
       - created
       - is_read
+      - to_user_ids
     properties:
       id:
         type: "string"
@@ -883,3 +940,8 @@ definitions:
       uri:
         type: "string"
         format: "uri"
+      to_user_ids:
+        type: array
+        items:
+          type: "string"
+          format: "uuid"
