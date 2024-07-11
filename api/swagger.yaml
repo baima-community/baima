@@ -835,7 +835,7 @@ definitions:
       - created
       - points
       - note
-      - source
+      - uri
       - from_user_id
       - to_user_id
     properties:
@@ -853,7 +853,7 @@ definitions:
       note:
         type: string
         description: Note explaining the reason for the points change
-      source:
+      uri:
         type: "string"
         format: "uri"
         description: "The source page for getting the rewards"
