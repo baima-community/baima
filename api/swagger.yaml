@@ -599,7 +599,7 @@ paths:
         500:
           description: Internal server error
 
-  /warehouse/points:
+  /points/warehouse/overview:
     get:
       tags:
         - points
@@ -613,6 +613,7 @@ paths:
             items:
               $ref: "#/definitions/WarehousePoints"
 
+  /points/warehouse:
     post:
       tags:
         - points
