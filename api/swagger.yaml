@@ -34,7 +34,14 @@ paths:
           name: body
           required: true
           schema:
-            $ref: '#/definitions/User'
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+              name:
+                type: string
       responses:
         '200':
           description: Login successfully
@@ -79,7 +86,14 @@ paths:
           in: body
           required: true
           schema:
-            $ref: '#/definitions/User'
+            type: object
+            properties:
+              username:
+                type: string
+              password:
+                type: string
+              name:
+                type: string
       responses:
         '200':
           description: User created
@@ -823,9 +837,6 @@ definitions:
       username:
         type: string
         example: zhegao
-      password:
-        type: string
-        format: password
       role:
         type: string
         enum:
